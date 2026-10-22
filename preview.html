@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preview · Nosso Mês</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    /* Página de preview: o app real (iframes) num celular e num computador, lado a lado. */
+    :root {
+      --fundo: #E9E9E9;
+      --texto: #0A0A0A;
+      --cinza: #7A7A7A;
+      --linha: #D6D6D6;
+      --aparelho: #0A0A0A;
+      --tela: #F5F5F5;
+      --janela: #FFFFFF;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fundo: #1A1A1A;
+        --texto: #F5F5F5;
+        --cinza: #8A8A8A;
+        --linha: #333333;
+        --aparelho: #000000;
+        --tela: #0B0B0B;
+        --janela: #242424;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      overflow-x: hidden;
+    }
+
+    .barra {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--linha);
+    }
+    .barra strong { font-family: 'Space Grotesk', sans-serif; font-size: 17px; }
+    .barra .dica { color: var(--cinza); }
+    .barra .acoes { margin-left: auto; display: flex; gap: 8px; }
+    .barra button, .barra a {
+      padding: 8px 14px;
+      border: 1px solid var(--linha);
+      border-radius: 999px;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .barra button:hover, .barra a:hover { border-color: var(--texto); }
+
+    .alerta-arquivo {
+      display: none;
+      margin: 16px 24px 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #FDF1F0;
+      color: #B3261E;
+    }
+
+    .palco {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+      padding: 24px;
+    }
+    .painel-pc { flex: 1 1 0; min-width: 0; }
+    .rotulo { color: var(--cinza); font-size: 12px; font-weight: 500; margin-bottom: 10px; }
+
+    /* "encaixe" ocupa o tamanho já reduzido; o aparelho dentro dele é encolhido com scale() */
+    .encaixe { overflow: hidden; }
+    .aparelho-escala { transform-origin: top left; }
+
+    /* Celular */
+    .celular {
+      width: 418px;
+      padding: 14px;
+      border-radius: 56px;
+      background: var(--aparelho);
+      box-shadow: 0 0 0 1px #3a3a3a inset;
+    }
+    .celular .tela {
+      overflow: hidden;
+      border-radius: 42px;
+      background: var(--tela);
+    }
+    .barra-status {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 44px;
+      padding: 0 30px;
+      color: var(--texto);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .barra-status .ilha {
+      position: absolute;
+      left: 50%;
+      top: 9px;
+      width: 112px;
+      height: 30px;
+      transform: translateX(-50%);
+      border-radius: 20px;
+      background: #000;
+    }
+    .celular iframe { display: block; width: 390px; height: 800px; border: 0; }
+
+    /* Computador */
+    .janela {
+      width: 1280px;
+      overflow: hidden;
+      border: 1px solid var(--linha);
+      border-radius: 14px;
+      background: var(--janela);
+    }
+    .janela-topo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--linha);
+    }
+    .janela-topo i { width: 12px; height: 12px; border-radius: 50%; background: var(--linha); }
+    .janela-topo span {
+      margin: 0 auto;
+      padding: 3px 60px;
+      border-radius: 8px;
+      background: var(--fundo);
+      color: var(--cinza);
+      font-size: 12px;
+    }
+    .janela iframe { display: block; width: 1280px; height: 800px; border: 0; }
+
+    /* Tela estreita: um embaixo do outro */
+    @media (max-width: 899px) {
+      .barra .dica { display: none; }
+      .palco { flex-direction: column; padding: 16px; }
+      .painel-pc { width: 100%; flex: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <strong>Nosso Mês</strong>
+    <span class="dica">preview · é o app de verdade, pode clicar nos dois</span>
+    <div class="acoes">
+      <button id="recarregar">Recarregar</button>
+      <a href="index.html" target="_blank">Abrir só o app</a>
+    </div>
+  </header>
+
+  <p class="alerta-arquivo" id="alerta-arquivo">
+    Este preview precisa ser aberto pelo <strong>iniciar.bat</strong> (dois cliques nele) pra mostrar o app.
+  </p>
+
+  <main class="palco">
+    <section class="painel-cel">
+      <p class="rotulo">Celular · 390px</p>
+      <div class="encaixe" id="encaixe-cel">
+        <div class="aparelho-escala celular" id="cel">
+          <div class="tela">
+            <div class="barra-status"><span id="hora">9:41</span><div class="ilha"></div><span>▮▮▮ ◔</span></div>
+            <iframe src="index.html" title="Nosso Mês no celular"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="painel-pc" id="painel-pc">
+      <p class="rotulo">Computador · 1280px</p>
+      <div class="encaixe" id="encaixe-pc">
+        <div class="aparelho-escala janela" id="pc">
+          <div class="janela-topo"><i></i><i></i><i></i><span>nosso-mes</span></div>
+          <iframe src="index.html" title="Nosso Mês no computador"></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    if (location.protocol === 'file:') {
+      document.getElementById('alerta-arquivo').style.display = 'block';
+    }
+
+    // Hora de verdade na barrinha do celular
+    const hora = document.getElementById('hora');
+    const atualizarHora = () => hora.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    atualizarHora();
+    setInterval(atualizarHora, 30000);
+
+    // Encolhe os aparelhos pra caberem na tela, sem mudar a largura que o app "enxerga"
+    const aparelhos = {
+      cel: { el: document.getElementById('cel'), encaixe: document.getElementById('encaixe-cel') },
+      pc: { el: document.getElementById('pc'), encaixe: document.getElementById('encaixe-pc') },
+    };
+
+    function encaixar(aparelho, larguraMax, alturaMax) {
+      const largura = aparelho.el.offsetWidth;
+      const altura = aparelho.el.offsetHeight;
+      const escala = Math.min(1, larguraMax / largura, alturaMax / altura);
+      aparelho.el.style.transform = `scale(${escala})`;
+      aparelho.encaixe.style.width = largura * escala + 'px';
+      aparelho.encaixe.style.height = altura * escala + 'px';
+    }
+
+    function ajustar() {
+      const empilhado = innerWidth < 900;
+      const alturaMax = empilhado ? Infinity : innerHeight - document.querySelector('.barra').offsetHeight - 80;
+      encaixar(aparelhos.cel, innerWidth - 32, alturaMax);
+      encaixar(aparelhos.pc, document.getElementById('painel-pc').clientWidth, alturaMax);
+    }
+
+    addEventListener('resize', ajustar);
+    ajustar();
+
+    document.getElementById('recarregar').addEventListener('click', () => {
+      document.querySelectorAll('iframe').forEach(quadro => quadro.contentWindow.location.reload());
+    });
+  </script>
+</body>
+</html>
