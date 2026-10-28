@@ -8,7 +8,7 @@ const CASCA = [
   '/css/estilos.css',
   '/js/dev-reload.js', '/js/supabase.js', '/js/dados.js', '/js/dados-nuvem.js',
   '/js/importar.js', '/js/telas.js', '/js/telas-cartoes.js', '/js/telas-empresas.js',
-  '/js/notas.js', '/js/auth.js', '/js/app.js',
+  '/js/notas.js', '/js/comprovantes.js', '/js/auth.js', '/js/app.js',
   '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png',
 ];
 

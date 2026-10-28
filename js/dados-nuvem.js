@@ -15,7 +15,7 @@ function deCartao(r) { return { id: r.id, nome: r.nome, banco: r.banco, titular:
 function deFatura(r) { return { id: r.id, cartaoId: r.cartao_id, mes: r.mes, valorBanco: r.valor_banco == null ? null : cent(r.valor_banco), pagaEm: r.paga_em, historico: r.historico || [] }; }
 function deRegra(r) { return { id: r.id, texto: r.texto, descricao: r.descricao || '', categoriaId: r.categoria_id || '', grupoId: r.grupo_id || '', origem: r.origem, em: r.em }; }
 function deGanho(r) { return { id: r.id, mes: r.mes, serieId: r.serie_id, descricao: r.descricao, valor: cent(r.valor), pessoa: r.pessoa, observacao: r.observacao || '', recebidoEm: r.recebido_em }; }
-function deConta(r) { return { id: r.id, mes: r.mes, serieId: r.serie_id, nome: r.nome, valor: cent(r.valor), dia: r.dia, categoriaId: r.categoria_id || '', grupoId: r.grupo_id || '', pagaEm: r.paga_em, naoVolta: !!r.nao_volta }; }
+function deConta(r) { return { id: r.id, mes: r.mes, serieId: r.serie_id, nome: r.nome, valor: cent(r.valor), dia: r.dia, categoriaId: r.categoria_id || '', grupoId: r.grupo_id || '', pagaEm: r.paga_em, naoVolta: !!r.nao_volta, comprovante: r.comprovante_path || null }; }
 function deCompra(r) {
   return {
     id: r.id, faturaId: r.fatura_id, data: r.data, descricaoBanco: r.descricao_banco || '', descricao: r.descricao || '',
@@ -37,7 +37,7 @@ function paraCartao(c) { return { id: c.id, casal_id: casalId, nome: c.nome, ban
 function paraFatura(f) { return { id: f.id, casal_id: casalId, cartao_id: f.cartaoId, mes: f.mes, valor_banco: f.valorBanco ?? null, paga_em: f.pagaEm || null, historico: f.historico || [] }; }
 function paraRegra(r) { return { id: r.id, casal_id: casalId, texto: r.texto, descricao: r.descricao || '', categoria_id: ouNulo(r.categoriaId), grupo_id: ouNulo(r.grupoId), origem: r.origem || 'cadastrada', em: r.em || null }; }
 function paraGanho(g) { return { id: g.id, casal_id: casalId, mes: g.mes, serie_id: ouNulo(g.serieId), descricao: g.descricao || '', valor: g.valor || 0, pessoa: g.pessoa || null, observacao: g.observacao || null, recebido_em: g.recebidoEm || null }; }
-function paraConta(c) { return { id: c.id, casal_id: casalId, mes: c.mes, serie_id: ouNulo(c.serieId), nome: c.nome || '', valor: c.valor || 0, dia: c.dia ?? null, categoria_id: ouNulo(c.categoriaId), grupo_id: ouNulo(c.grupoId), paga_em: c.pagaEm || null, nao_volta: !!c.naoVolta }; }
+function paraConta(c) { return { id: c.id, casal_id: casalId, mes: c.mes, serie_id: ouNulo(c.serieId), nome: c.nome || '', valor: c.valor || 0, dia: c.dia ?? null, categoria_id: ouNulo(c.categoriaId), grupo_id: ouNulo(c.grupoId), paga_em: c.pagaEm || null, nao_volta: !!c.naoVolta, comprovante_path: c.comprovante || null }; }
 function paraCompra(c) {
   return {
     id: c.id, casal_id: casalId, fatura_id: c.faturaId, data: c.data || null, descricao_banco: c.descricaoBanco || null,
@@ -115,6 +115,7 @@ function reiniciarSnapshot() {
 async function sincronizar() {
   const gravar = []; // [{ nome, linhas }]
   const apagar = []; // [{ nome, ids }]
+  const fotosSumidas = []; // comprovantes das contas apagadas: as fotos saem da pasta junto
 
   for (const [nome, pegar, paraBanco] of GAVETAS) {
     const foto = retrato[nome] || new Map();
@@ -124,6 +125,12 @@ async function sincronizar() {
     const sumidos = [...foto.keys()].filter(id => !idsAgora.has(id));
     if (mudados.length) gravar.push({ nome, linhas: mudados.map(paraBanco) });
     if (sumidos.length) apagar.push({ nome, ids: sumidos });
+    if (nome === 'contas') {
+      for (const id of sumidos) {
+        const comprovante = JSON.parse(foto.get(id)).comprovante;
+        if (comprovante) fotosSumidas.push(comprovante);
+      }
+    }
   }
 
   // Gravar (novos + mudados), pais antes dos filhos
@@ -145,6 +152,11 @@ async function sincronizar() {
   for (let i = apagar.length - 1; i >= 0; i--) {
     const { error } = await sb.from(apagar[i].nome).delete().in('id', apagar[i].ids);
     if (error) throw error;
+  }
+
+  if (fotosSumidas.length) {
+    const { error } = await sb.storage.from(PASTA_COMPROVANTES).remove(fotosSumidas);
+    if (error) console.warn('Não consegui apagar fotos de comprovantes:', error); // sobra um arquivo, mas nada quebra
   }
 
   reiniciarSnapshot(); // deu tudo certo: a nova foto é o estado atual

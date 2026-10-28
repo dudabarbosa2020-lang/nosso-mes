@@ -24,6 +24,7 @@ const desenhos = {
   empresa: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
   ajustes: '<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>',
   mover: '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  clipe: '<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
   nota: '<path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/>',
   aviso: '<path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
 };
@@ -90,13 +91,18 @@ function itemConta(conta) {
     ? `<button class="selo feito" data-acao="desfazer-pagamento" data-id="${conta.id}" title="Toque pra desfazer">Pago ${dataCurta(conta.pagaEm)}</button>`
     : `<button class="selo" data-acao="pagar" data-id="${conta.id}">Paguei</button>`;
 
+  // Clipe só nas contas pagas: verde quando já tem a foto do comprovante, cinza quando ainda não
+  const clipe = conta.pagaEm
+    ? `<button class="clipe ${conta.comprovante ? 'tem' : ''}" data-acao="ver-comprovante" data-id="${conta.id}" aria-label="${conta.comprovante ? 'Ver comprovante' : 'Anexar comprovante'}">${icone('clipe')}</button>`
+    : '';
+
   return `
     <li class="${vencida ? 'vencida' : ''}">
       <button class="item-principal" data-acao="editar-conta" data-id="${conta.id}">
         <span class="nome">${esc(conta.nome)}</span>
         <span class="detalhe">${esc(detalhes)}</span>
       </button>
-      <div class="item-lado"><span class="quanto">${real(conta.valor)}</span>${situacao}</div>
+      <div class="item-lado"><span class="quanto">${real(conta.valor)}</span><div class="selo-linha">${clipe}${situacao}</div></div>
     </li>`;
 }
 

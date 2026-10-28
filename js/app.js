@@ -608,7 +608,9 @@ document.addEventListener('click', evento => {
     case 'cancelar-edicao': return pararDeEditar();
     case 'fechar': return fecharJanela();
 
-    case 'pagar': marcar('conta', id, hojeISO()); mostrarTela(); return avisar('Paga ✓');
+    case 'pagar': marcar('conta', id, hojeISO()); mostrarTela(); return oferecerComprovante(id); // a janela já diz "Paga ✓"
+    case 'ver-comprovante': return verComprovante(id);
+    case 'remover-comprovante': return removerComprovante(id);
     case 'desfazer-pagamento': marcar('conta', id, null); mostrarTela(); return avisar('Pagamento desfeito');
     case 'pagar-fatura': atualizarFatura(id, { pagaEm: hojeISO() }); mostrarTela(); return avisar('Fatura paga ✓');
     case 'desfazer-pagamento-fatura': atualizarFatura(id, { pagaEm: null }); mostrarTela(); return avisar('Pagamento desfeito');
@@ -677,6 +679,9 @@ document.addEventListener('change', evento => {
     dados.grupos.find(g => g.id === campo.dataset.id).empresa = campo.checked;
     return salvar();
   }
+
+  // Foto do comprovante escolhida (ou tirada na hora)
+  if ('comprovante' in campo.dataset && campo.files.length) return anexarComprovante(campo.dataset.comprovante, campo.files[0]);
 
   // Importação: arquivo escolhido, cartão/mês/valor do banco, e as linhas da revisão
   if ('importarArquivo' in campo.dataset && campo.files.length) return lerArquivoEscolhido(campo.files);
