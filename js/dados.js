@@ -232,26 +232,33 @@ function vencidasPara(mes) {
 
 function textoResumo(mes) {
   const r = resumoDoMes(mes);
-  const listar = contas => contas.map(c => `${c.nome} (${real(c.valor)}, dia ${c.dia})`).join(', ');
-  const partes = [
-    `Nosso Mês · ${nomeDoMes(mes, false)}: ` +
-      (r.folga >= 0 ? `ainda podemos gastar ${real(r.folga)}.` : `passamos ${real(-r.folga)} do que ganhamos.`),
+  // Um tópico por linha. Os asteriscos viram negrito no WhatsApp.
+  const listar = contas => contas.map(c => `• ${c.nome} — ${real(c.valor)} · dia ${c.dia}`);
+  const blocos = [
+    [
+      `📅 *Nosso Mês · ${nomeDoMes(mes, false)}*`,
+      r.folga >= 0 ? `✅ Ainda podemos gastar ${real(r.folga)}` : `🔴 Passamos ${real(-r.folga)} do que ganhamos`,
+    ],
   ];
 
   const faltam = r.pagaveis.filter(c => !c.pagaEm && !estaVencida(c)).sort(porVencimento);
-  if (faltam.length) partes.push(`Faltam pagar: ${listar(faltam)}.`);
+  if (faltam.length) blocos.push([`🧾 *Faltam pagar*`, ...listar(faltam)]);
 
   const vencidas = vencidasPara(mes);
-  if (vencidas.length) partes.push(`⚠️ ${vencidas.length > 1 ? 'Vencidas' : 'Vencida'}: ${listar(vencidas)}.`);
+  if (vencidas.length) blocos.push([`⚠️ *${vencidas.length > 1 ? 'Vencidas' : 'Vencida'}*`, ...listar(vencidas)]);
 
-  if (r.recebido < r.entra) partes.push(`Ainda falta receber ${real(r.entra - r.recebido)}.`);
+  // Total geral: o que falta pagar mais o que já venceu
+  if (faltam.length || vencidas.length) blocos.push([`💸 *Total que ainda falta pagar: ${real(soma(faltam) + soma(vencidas))}*`]);
+
+  const pagas = r.pagaveis.filter(c => c.pagaEm).sort(porVencimento);
+  if (pagas.length) blocos.push([`✅ *Já pagas*`, ...listar(pagas), `💚 *Total pago: ${real(soma(pagas))}*`]);
+
+  if (r.recebido < r.entra) blocos.push([`💰 *Ainda falta receber*`, `• ${real(r.entra - r.recebido)}`]);
 
   const devendo = r.empresas.filter(e => e.falta > 0);
-  if (devendo.length) {
-    const lista = devendo.map(e => `a ${e.nome} ${real(e.falta)}`);
-    partes.push(`Falta voltar das empresas: ${lista.length > 1 ? `${lista.slice(0, -1).join(', ')} e ${lista[lista.length - 1]}` : lista[0]}.`);
-  }
-  return partes.join(' ');
+  if (devendo.length) blocos.push([`🏢 *Falta voltar das empresas*`, ...devendo.map(e => `• ${e.nome} — ${real(e.falta)}`)]);
+
+  return blocos.map(linhas => linhas.join('\n')).join('\n\n');
 }
 
 // ---------- Nomes ----------
