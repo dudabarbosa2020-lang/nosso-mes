@@ -253,7 +253,13 @@ function textoResumo(mes) {
   const pagas = r.pagaveis.filter(c => c.pagaEm).sort(porVencimento);
   if (pagas.length) blocos.push([`*Já pagas*`, ...listar(pagas), `*Total pago: ${real(soma(pagas))}*`]);
 
-  if (r.recebido < r.entra) blocos.push([`*Ainda falta receber*`, `• ${real(r.entra - r.recebido)}`]);
+  const aReceber = r.ganhos.filter(g => !g.recebidoEm).sort((a, b) => a.descricao.localeCompare(b.descricao));
+  if (aReceber.length) {
+    const quem = g => (g.pessoa === 'p1' || g.pessoa === 'p2' ? ` · ${nomePessoa(g.pessoa)}` : '');
+    const linhas = aReceber.map(g => `• ${g.descricao} — ${real(g.valor)}${quem(g)}`);
+    if (aReceber.length > 1) linhas.push(`*Total a receber: ${real(soma(aReceber))}*`);
+    blocos.push([`*Ainda falta receber*`, ...linhas]);
+  }
 
   const devendo = r.empresas.filter(e => e.falta > 0);
   if (devendo.length) blocos.push([`*Falta voltar das empresas*`, ...devendo.map(e => `• ${e.nome} — ${real(e.falta)}`)]);
