@@ -5,6 +5,7 @@
 let sessao = null;
 let casalId = null;
 let cofre = null;            // { id, nome_pessoa1, nome_pessoa2, codigo_convite }
+let minhaPessoa = null;      // 'p1' | 'p2' | null — quem é este login (null = ainda não disse)
 let modoCadastro = false;    // portão: entrar x criar conta
 let modoCofre = 'escolher';  // cofre: escolher | criar | entrar | pronto
 
@@ -203,6 +204,8 @@ async function enviarCofre(form) {
 async function sair() {
   casalId = null;
   cofre = null;
+  minhaPessoa = null;
+  notas = [];
   modoCofre = 'escolher';
   await sb.auth.signOut();
 }
@@ -233,9 +236,10 @@ document.addEventListener('submit', evento => {
 
 // Descobre o cofre da pessoa logada. Devolve o casalId, ou null se ela ainda não tem cofre.
 async function resolverCofre() {
-  const { data, error } = await sb.from('membros').select('casal_id').limit(1);
-  if (error || !data || !data.length) { casalId = null; cofre = null; return null; }
+  const { data, error } = await sb.from('membros').select('casal_id, pessoa').eq('user_id', sessao.user.id).limit(1);
+  if (error || !data || !data.length) { casalId = null; cofre = null; minhaPessoa = null; return null; }
   casalId = data[0].casal_id;
+  minhaPessoa = data[0].pessoa || null;
   const { data: c } = await sb.from('casais').select('*').eq('id', casalId).single();
   cofre = c || null;
   return casalId;
@@ -258,6 +262,7 @@ async function aposLogin() {
   try {
     abrirGate(`<div class="portao-cartao"><span class="nome-app">Nosso Mês</span><p class="portao-sub">Carregando os dados de vocês…</p></div>`);
     await carregarDoSupabase();
+    await carregarNotas(); // se falhar, a tela de anotações avisa; o resto do app abre normal
   } catch (erro) {
     console.error('Erro ao carregar do Supabase:', erro);
     return abrirGate(`

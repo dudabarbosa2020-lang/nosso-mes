@@ -15,6 +15,7 @@ const telas = {
   descricoes: { titulo: 'Descrições padrão', desenhar: telaDescricoes, voltar: 'cartoes' },
   empresas: { titulo: 'Empresas', desenhar: telaEmpresas, comMes: true },
   ganhos: { titulo: 'Ganhos', desenhar: telaGanhos, comMes: true },
+  notas: { titulo: 'Notas', desenhar: telaNotas, comMes: false },
   ajustes: { titulo: 'Ajustes', desenhar: telaAjustes, comMes: false },
 };
 
@@ -48,6 +49,7 @@ function mostrarTela() {
   document.getElementById('topo').innerHTML = titulo + `<div class="topo-direita">${tela.comMes ? seletorMes() : ''}${botaoAjustes}</div>`;
   document.getElementById('tela').innerHTML = tela.desenhar(...partes);
   document.title = rota === 'inicio' ? 'Nosso Mês' : `${tela.titulo} · Nosso Mês`;
+  if (rota === 'notas') atualizarNotasSePreciso(); // a outra pessoa pode ter escrito algo
 }
 
 // Começa uma importação nova quando se chega em "#importar/cartão/mês" (ou mantém a que está em andamento)
@@ -71,7 +73,7 @@ function prepararImportacao([cartaoId, mes]) {
 
 // Põe o cursor no primeiro campo de uma linha (a nova, ou a que está em edição)
 function focarLinha(seletor) {
-  const campo = document.querySelector(`${seletor} input:not([type=hidden])`);
+  const campo = document.querySelector(`${seletor} input:not([type=hidden]), ${seletor} textarea`);
   if (campo) campo.focus();
 }
 
@@ -98,9 +100,9 @@ function irParaNovo(rota) {
 // Alguém está no meio de um preenchimento? (pra não apagar o que está sendo digitado)
 function preenchendo() {
   const focado = document.activeElement;
-  if (focado && focado.matches('input, select') && document.getElementById('tela').contains(focado)) return true;
+  if (focado && focado.matches('input, select, textarea') && document.getElementById('tela').contains(focado)) return true;
   return [...document.querySelectorAll('.linha-form')].some(form =>
-    [...form.querySelectorAll('input:not([type=checkbox]):not([type=hidden])')].some(campo => campo.value !== campo.defaultValue));
+    [...form.querySelectorAll('input:not([type=checkbox]):not([type=hidden]), textarea')].some(campo => campo.value !== campo.defaultValue));
 }
 
 // ---------- Avisinho e janela por cima da tela ----------
@@ -598,7 +600,11 @@ document.addEventListener('click', evento => {
     case 'editar-ganho':
     case 'editar-cartao':
     case 'editar-compra':
-    case 'editar-regra': return editar(id);
+    case 'editar-regra':
+    case 'editar-nota': return editar(id);
+    case 'apagar-nota': return apagarNotaComPergunta(id);
+    case 'eu-sou': return escolherPessoa(botao.dataset.pessoa);
+    case 'trocar-pessoa': return trocarPessoa();
     case 'cancelar-edicao': return pararDeEditar();
     case 'fechar': return fecharJanela();
 
@@ -742,6 +748,7 @@ document.addEventListener('submit', evento => {
   if (tipo === 'transformar') return transformar(form);
   if (tipo === 'regra') return salvarRegraDoFormulario(form);
   if (tipo === 'devolucao') return salvarDevolucao(form);
+  if (tipo === 'nota') return salvarNota(form);
 
   const nome = form.elements.nome.value.trim();
   if (!nome) return;

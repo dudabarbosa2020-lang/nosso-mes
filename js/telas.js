@@ -24,6 +24,7 @@ const desenhos = {
   empresa: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
   ajustes: '<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>',
   mover: '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  nota: '<path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"/><path d="M15 3v6h6"/>',
   aviso: '<path d="m21.7 18-8-14a2 2 0 0 0-3.5 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
 };
 
@@ -373,6 +374,7 @@ function telaAjustes() {
     <section class="secao">
       <h2>Conta</h2>
       <p class="ajuda">Logada como <strong>${esc(emailLogado())}</strong>.</p>
+      ${minhaPessoa ? `<p class="ajuda">Nas anotações, você aparece como <strong>${esc(nomePessoa(minhaPessoa))}</strong>. <button class="botao-texto" data-acao="trocar-pessoa">Trocar</button></p>` : ''}
       <button class="botao secundario" data-acao="sair">Sair da conta</button>
     </section>
 

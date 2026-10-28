@@ -506,7 +506,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ---------- Formulários ---------- */
 
-input, select {
+input, select, textarea {
   width: 100%;
   height: 48px;
   padding: 0 14px;
@@ -518,9 +518,11 @@ input, select {
   font-size: 16px;
   transition: border-color var(--rapido);
 }
-input::placeholder { color: var(--cinza); }
-input:hover, select:hover { border-color: var(--cinza); }
-input:focus, select:focus { outline: 2px solid var(--texto); outline-offset: -1px; border-color: transparent; }
+/* Campo de texto grande (anotações): cresce pra baixo em vez de ter altura fixa */
+textarea { height: auto; min-height: 96px; padding: 12px 14px; line-height: 1.4; resize: vertical; }
+input::placeholder, textarea::placeholder { color: var(--cinza); }
+input:hover, select:hover, textarea:hover { border-color: var(--cinza); }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--texto); outline-offset: -1px; border-color: transparent; }
 
 .campo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .campo > span { color: var(--texto-2); font-size: 13px; font-weight: 500; }
@@ -646,6 +648,13 @@ a.item-principal { display: block; color: inherit; text-decoration: none; }
   text-underline-offset: 3px;
 }
 .botao-texto:hover { color: var(--texto); }
+
+/* Anotações */
+.linha-nota { display: flex; flex-direction: column; gap: 12px; }
+.lista li.nota { align-items: flex-start; }
+.nota-corpo { flex: 1; min-width: 0; }
+.nota-texto { margin-bottom: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nota-corpo .detalhe { display: block; color: var(--texto-2); font-size: 13px; }
 
 .grade-cartoes .secao:first-child { margin-top: 0; }
 .transformar + .grade-cartoes .secao:first-child { margin-top: 16px; }
