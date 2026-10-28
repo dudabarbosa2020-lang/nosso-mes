@@ -236,27 +236,27 @@ function textoResumo(mes) {
   const listar = contas => contas.map(c => `• ${c.nome} — ${real(c.valor)} · dia ${c.dia}`);
   const blocos = [
     [
-      `📅 *Nosso Mês · ${nomeDoMes(mes, false)}*`,
-      r.folga >= 0 ? `✅ Ainda podemos gastar ${real(r.folga)}` : `🔴 Passamos ${real(-r.folga)} do que ganhamos`,
+      `*Nosso Mês · ${nomeDoMes(mes, false)}*`,
+      r.folga >= 0 ? `Ainda podemos gastar ${real(r.folga)}` : `Passamos ${real(-r.folga)} do que ganhamos`,
     ],
   ];
 
   const faltam = r.pagaveis.filter(c => !c.pagaEm && !estaVencida(c)).sort(porVencimento);
-  if (faltam.length) blocos.push([`🧾 *Faltam pagar*`, ...listar(faltam)]);
+  if (faltam.length) blocos.push([`*Faltam pagar*`, ...listar(faltam)]);
 
   const vencidas = vencidasPara(mes);
-  if (vencidas.length) blocos.push([`⚠️ *${vencidas.length > 1 ? 'Vencidas' : 'Vencida'}*`, ...listar(vencidas)]);
+  if (vencidas.length) blocos.push([`*${vencidas.length > 1 ? 'Vencidas' : 'Vencida'}*`, ...listar(vencidas)]);
 
   // Total geral: o que falta pagar mais o que já venceu
-  if (faltam.length || vencidas.length) blocos.push([`💸 *Total que ainda falta pagar: ${real(soma(faltam) + soma(vencidas))}*`]);
+  if (faltam.length || vencidas.length) blocos.push([`*Total que ainda falta pagar: ${real(soma(faltam) + soma(vencidas))}*`]);
 
   const pagas = r.pagaveis.filter(c => c.pagaEm).sort(porVencimento);
-  if (pagas.length) blocos.push([`✅ *Já pagas*`, ...listar(pagas), `💚 *Total pago: ${real(soma(pagas))}*`]);
+  if (pagas.length) blocos.push([`*Já pagas*`, ...listar(pagas), `*Total pago: ${real(soma(pagas))}*`]);
 
-  if (r.recebido < r.entra) blocos.push([`💰 *Ainda falta receber*`, `• ${real(r.entra - r.recebido)}`]);
+  if (r.recebido < r.entra) blocos.push([`*Ainda falta receber*`, `• ${real(r.entra - r.recebido)}`]);
 
   const devendo = r.empresas.filter(e => e.falta > 0);
-  if (devendo.length) blocos.push([`🏢 *Falta voltar das empresas*`, ...devendo.map(e => `• ${e.nome} — ${real(e.falta)}`)]);
+  if (devendo.length) blocos.push([`*Falta voltar das empresas*`, ...devendo.map(e => `• ${e.nome} — ${real(e.falta)}`)]);
 
   return blocos.map(linhas => linhas.join('\n')).join('\n\n');
 }
